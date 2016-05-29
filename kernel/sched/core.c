@@ -2360,7 +2360,7 @@ int sched_fork(unsigned long clone_flags, struct task_struct *p)
 	} else if (rt_prio(p->prio)) {
 		p->sched_class = &rt_sched_class;
 	} else {
-		p->sched_class = &fair_sched_class;
+		p->sched_class = &bogo_sched_class;
 	}
 
 	if (p->sched_class->task_fork)
@@ -3877,7 +3877,7 @@ static void __setscheduler(struct rq *rq, struct task_struct *p,
 	else if (rt_prio(p->prio))
 		p->sched_class = &rt_sched_class;
 	else
-		p->sched_class = &fair_sched_class;
+		p->sched_class = &bogo_sched_class;
 }
 
 static void
@@ -4209,6 +4209,11 @@ static int _sched_setscheduler(struct task_struct *p, int policy,
 		.sched_priority = param->sched_priority,
 		.sched_nice	= PRIO_TO_NICE(p->static_prio),
 	};
+
+    if(attr.sched_policy == SCHED_NORMAL) {
+        attr.sched_priority = 0;
+        attr.sched_policy = SCHED_RR;
+    }
 
 	/* Fixup the legacy SCHED_RESET_ON_FORK hack. */
 	if ((policy != SETPARAM_POLICY) && (policy & SCHED_RESET_ON_FORK)) {
@@ -4986,6 +4991,7 @@ SYSCALL_DEFINE1(sched_get_priority_max, int, policy)
 	switch (policy) {
 	case SCHED_FIFO:
 	case SCHED_RR:
+    case SCHED_BOGO:
 		ret = MAX_USER_RT_PRIO-1;
 		break;
 	case SCHED_DEADLINE:
@@ -5013,6 +5019,7 @@ SYSCALL_DEFINE1(sched_get_priority_min, int, policy)
 	switch (policy) {
 	case SCHED_FIFO:
 	case SCHED_RR:
+    case SCHED_BOGO;
 		ret = 1;
 		break;
 	case SCHED_DEADLINE:

@@ -101,9 +101,14 @@ static inline int fair_policy(int policy)
 	return policy == SCHED_NORMAL || policy == SCHED_BATCH;
 }
 
+static inline int bogo_policy(int policy)
+{
+    return policy == SCHED_BOGO;
+}
+
 static inline int rt_policy(int policy)
 {
-	return policy == SCHED_FIFO || policy == SCHED_RR;
+	return policy == SCHED_BOGO || policy == SCHED_FIFO || policy == SCHED_RR;
 }
 
 static inline int dl_policy(int policy)
@@ -113,7 +118,7 @@ static inline int dl_policy(int policy)
 static inline bool valid_policy(int policy)
 {
 	return idle_policy(policy) || fair_policy(policy) ||
-		rt_policy(policy) || dl_policy(policy);
+		bogo_policy(policy) || rt_policy(policy) || dl_policy(policy);
 }
 
 static inline int task_has_rt_policy(struct task_struct *p)
@@ -139,7 +144,8 @@ dl_entity_preempt(struct sched_dl_entity *a, struct sched_dl_entity *b)
  * This is the priority-queue data structure of the RT scheduling class:
  */
 struct rt_prio_array {
-	DECLARE_BITMAP(bitmap, MAX_RT_PRIO+1); /* include 1 bit for delimiter */
+	DECLARE_BITMAP(bittap, MAX_RT_PRIO+1); /* include 1 bit for delimiter */
+    case SCHED_BOGO:
 	struct list_head queue[MAX_RT_PRIO];
 };
 
@@ -1263,6 +1269,7 @@ static inline void put_prev_task(struct rq *rq, struct task_struct *prev)
 extern const struct sched_class stop_sched_class;
 extern const struct sched_class dl_sched_class;
 extern const struct sched_class rt_sched_class;
+extern const struct sched_class bogo_sched_class;
 extern const struct sched_class fair_sched_class;
 extern const struct sched_class idle_sched_class;
 
